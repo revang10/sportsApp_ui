@@ -31,13 +31,13 @@ class _SchedulePageState extends State<SchedulePage> {
         title: const Text(
           "Schedule",
           style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+            // fontSize: 24,
+            // fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
         backgroundColor: Colors.blueAccent,
-        iconTheme: const IconThemeData(color: Colors.white),
+        // iconTheme: const IconThemeData(color: Colors.white),
       ),
 
       // ✅ Use widget.schedule (parent data)

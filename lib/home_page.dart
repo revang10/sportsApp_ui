@@ -4,7 +4,7 @@ import 'pages/notifications_page.dart';
 import 'pages/schedule_page.dart';
 import 'pages/exercises_page.dart';
 import 'pages/trainingplan_page.dart';
-import 'pages/progress_page.dart';
+import 'pages/products_page.dart';
 import 'pages/weight_page.dart';
 import 'pages/sleep_page.dart';
 import 'pages/settings_page.dart';
@@ -64,9 +64,9 @@ class _HomePageState extends State<HomePage> {
         "page": TrainingPlanPage()
       },
       {
-        "title": "Progress",
+        "title": "Products",
         "icon": Icons.hourglass_empty,
-        "page": ProgressPage()
+        "page": ProductsPage()
       },
       {
         "title": "Weight",
