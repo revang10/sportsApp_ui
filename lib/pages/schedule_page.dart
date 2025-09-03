@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
 class SchedulePage extends StatefulWidget {
+  final List<Map<String, String>> schedule;
+  final Function(Map<String, String>) onAdd;
+
+  const SchedulePage({Key? key, required this.schedule, required this.onAdd})
+    : super(key: key);
+
   @override
   _SchedulePageState createState() => _SchedulePageState();
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  final List<Map<String, String>> schedule = [];
-
   final titleController = TextEditingController();
   final timeController = TextEditingController();
   final descController = TextEditingController();
@@ -24,7 +28,7 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Schedule",
           style: TextStyle(
             fontSize: 24,
@@ -33,9 +37,11 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),
         backgroundColor: Colors.blueAccent,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: schedule.isEmpty
+
+      // ✅ Use widget.schedule (parent data)
+      body: widget.schedule.isEmpty
           ? const Center(
               child: Text(
                 "No events yet. Tap + to add one!",
@@ -44,9 +50,9 @@ class _SchedulePageState extends State<SchedulePage> {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(12),
-              itemCount: schedule.length,
+              itemCount: widget.schedule.length,
               itemBuilder: (context, index) {
-                final item = schedule[index];
+                final item = widget.schedule[index];
                 return Card(
                   elevation: 3,
                   margin: const EdgeInsets.symmetric(vertical: 8),
@@ -54,7 +60,10 @@ class _SchedulePageState extends State<SchedulePage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: ListTile(
-                    leading: const Icon(Icons.schedule, color: Colors.blueAccent),
+                    leading: const Icon(
+                      Icons.schedule,
+                      color: Colors.blueAccent,
+                    ),
                     title: Text(
                       item['title'] ?? '',
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -62,7 +71,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     subtitle: Text(
                       "${item['time'] ?? ''}\n${item['description'] ?? ''}",
                     ),
-                    isThreeLine: true, // lets subtitle wrap nicely
+                    isThreeLine: true,
                   ),
                 );
               },
@@ -78,33 +87,23 @@ class _SchedulePageState extends State<SchedulePage> {
                 content: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children:[
-                      // TextField(
-                      //   controller: timeController,
-                      //   decoration: const InputDecoration(
-                      //     labelText: "Time (e.g. 09:00 AM)",
-                      //     ),
-                      // ),
+                    children: [
+                      // Time Picker
                       TextField(
                         controller: timeController,
-                        readOnly: true, // Prevents keyboard from appearing
+                        readOnly: true,
                         onTap: () async {
-                          // Show the time picker dialog
                           final TimeOfDay? selectedTime = await showTimePicker(
                             context: context,
-                            initialTime: TimeOfDay.now(), // Sets the initial time
+                            initialTime: TimeOfDay.now(),
                           );
-
-                          // If the user selected a time
                           if (selectedTime != null) {
-                            // Format the time as a string and update the TextField
-                            final String formattedTime = selectedTime.format(context);
-                            timeController.text = formattedTime;
+                            timeController.text = selectedTime.format(context);
                           }
                         },
                         decoration: const InputDecoration(
                           labelText: "Time",
-                          suffixIcon: Icon(Icons.access_time), // Adds a clock icon
+                          suffixIcon: Icon(Icons.access_time),
                         ),
                       ),
                       TextField(
@@ -113,28 +112,31 @@ class _SchedulePageState extends State<SchedulePage> {
                       ),
                       TextField(
                         controller: descController,
-                        decoration: const InputDecoration(labelText: "Description"),
-                      )
-                    ]
-                  )
+                        decoration: const InputDecoration(
+                          labelText: "Description",
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 actions: [
                   TextButton(
-                    onPressed:() => Navigator.pop(context) , 
+                    onPressed: () => Navigator.pop(context),
                     child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent, // Change background color to blue
-                      foregroundColor: Colors.white, // Change text color to white
-                      ),
-                      onPressed: (){
+                    onPressed: () {
                       if (titleController.text.trim().isEmpty) return;
 
+                      // ✅ Call parent function instead of local state
                       setState(() {
-                        schedule.add({
+                        widget.onAdd({
                           'time': timeController.text.trim(),
-                          'title':titleController.text.trim(),
+                          'title': titleController.text.trim(),
                           'description': descController.text.trim(),
                         });
                       });
@@ -144,20 +146,16 @@ class _SchedulePageState extends State<SchedulePage> {
                       descController.clear();
 
                       Navigator.pop(context);
-                    }, 
+                    },
                     child: const Text('Add'),
-                    
-                    ),
+                  ),
                 ],
-
               );
             },
-
           );
-
-      },
-      backgroundColor: Colors.blueAccent,
-      child: Icon(Icons.add, color: Colors.white),
+        },
+        backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

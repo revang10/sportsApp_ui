@@ -15,8 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // final List<Map<String, String>> schedule = [];
-  String userName = "David Jones"; // ✅ this stores the current name
+  String userName = "David Jones"; // ✅ stores user name
+  List<Map<String, String>> schedule = []; // ✅ stores schedule events
 
   @override
   Widget build(BuildContext context) {
@@ -24,29 +24,66 @@ class _HomePageState extends State<HomePage> {
 
     final List<Map<String, dynamic>> cardData = [
       {
-        "title": "Profile","icon": Icons.person,
+        "title": "Profile",
+        "icon": Icons.person,
         "page": ProfilePage(
-          currentName: userName, // ✅ pass current name
+          currentName: userName,
           onSave: (newName) {
             setState(() {
-              userName = newName; // ✅ update when saved
+              userName = newName;
             });
           },
         ),
       },
-      {"title": "Notifications", "icon": Icons.notifications, "page": NotificationsPage()},
-      {"title": "Schedule", "icon": Icons.event_note, "page": SchedulePage()},
-      {"title": "Exercises", "icon": Icons.sports_gymnastics, "page": ExercisesPage()},
-      {"title": "Training Plan", "icon": Icons.list, "page": TrainingPlanPage()},
-      {"title": "Progress", "icon": Icons.hourglass_empty, "page": ProgressPage()},
-      {"title": "Weight", "icon": Icons.fitness_center, "page": WeightPage()},
+      {
+        "title": "Notifications",
+        "icon": Icons.notifications,
+        "page": NotificationsPage()
+      },
+      {
+        "title": "Schedule",
+        "icon": Icons.event_note,
+        // ✅ Pass schedule list & onAdd callback
+        "page": SchedulePage(
+          schedule: schedule,
+          onAdd: (event) {
+            setState(() {
+              schedule.add(event);
+            });
+          },
+        ),
+      },
+      {
+        "title": "Exercises",
+        "icon": Icons.sports_gymnastics,
+        "page": ExercisesPage()
+      },
+      {
+        "title": "Training Plan",
+        "icon": Icons.list,
+        "page": TrainingPlanPage()
+      },
+      {
+        "title": "Progress",
+        "icon": Icons.hourglass_empty,
+        "page": ProgressPage()
+      },
+      {
+        "title": "Weight",
+        "icon": Icons.fitness_center,
+        "page": WeightPage()
+      },
       {"title": "Sleep", "icon": Icons.bedtime, "page": SleepPage()},
       {"title": "Settings", "icon": Icons.settings, "page": SettingsPage()},
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home Page", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text(
+          "Home Page",
+          style: TextStyle(
+              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         backgroundColor: Color(0xFF1076FF),
       ),
       body: Column(
@@ -65,19 +102,28 @@ class _HomePageState extends State<HomePage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))],
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))
+              ],
             ),
             child: Row(
               children: [
-                CircleAvatar(radius: 40, backgroundImage: AssetImage('assets/images/profile.jpeg')),
+                CircleAvatar(
+                    radius: 40,
+                    backgroundImage: AssetImage('assets/images/profile.jpeg')),
                 SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(userName, // ✅ use dynamic name here
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    Text(userName,
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87)),
                     SizedBox(height: 4),
-                    Text("Active User", style: TextStyle(fontSize: 14, color: Colors.black54)),
+                    Text("Active User",
+                        style: TextStyle(fontSize: 14, color: Colors.black54)),
                   ],
                 ),
               ],
@@ -101,19 +147,26 @@ class _HomePageState extends State<HomePage> {
                         context,
                         PageRouteBuilder(
                           transitionDuration: Duration(milliseconds: 400),
-                          pageBuilder: (context, animation, secondaryAnimation) => cardData[index]["page"],
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          pageBuilder: (context, animation, secondaryAnimation) =>
+                              cardData[index]["page"],
+                          transitionsBuilder: (context, animation,
+                              secondaryAnimation, child) {
                             final offsetAnimation = Tween<Offset>(
                               begin: Offset(0.2, 1.0),
                               end: Offset.zero,
-                            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+                            ).animate(CurvedAnimation(
+                                parent: animation, curve: Curves.easeOutCubic));
 
-                            final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
-                                .animate(CurvedAnimation(parent: animation, curve: Curves.easeIn));
+                            final fadeAnimation = Tween<double>(
+                                    begin: 0.0, end: 1.0)
+                                .animate(CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeIn));
 
                             return FadeTransition(
                               opacity: fadeAnimation,
-                              child: SlideTransition(position: offsetAnimation, child: child),
+                              child: SlideTransition(
+                                  position: offsetAnimation, child: child),
                             );
                           },
                         ),
@@ -123,15 +176,24 @@ class _HomePageState extends State<HomePage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         color: Colors.white,
-                        boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))],
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black45,
+                              blurRadius: 6,
+                              offset: Offset(0, 0))
+                        ],
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(cardData[index]["icon"], size: 40, color: Color(0xFF1076FF)),
+                          Icon(cardData[index]["icon"],
+                              size: 40, color: Color(0xFF1076FF)),
                           SizedBox(height: 8),
                           Text(cardData[index]["title"],
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54)),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54)),
                         ],
                       ),
                     ),
