@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:sports_ui/pages/productdetails_page.dart'; // for JSON decoding
+import 'package:sports_ui/pages/productdetails_page.dart';
 
 class ProductPage extends StatefulWidget {
   @override
@@ -12,57 +12,61 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   List<Map<String, dynamic>> products = [];
 
-  Future<void> postProduct(
-    String title,
-    String description,
-    double price,
-  ) async {
-    final url = Uri.parse(
-      "https://fakestoreapi.com/products",
-    ); // replace with your API endpoint
-    final body = {
-      "title": title,
-      "description": description,
-      "price": price.toString(),
-    };
+  // ✅ Fixed POST method
+  Future<void> postProduct(String name, String description, double price) async {
+    final url = Uri.parse("http://10.0.2.2:8000/products"); // FastAPI endpoint
 
     try {
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(body),
-    );
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "title": name,              // ✅ match backend
+          "description": description,
+          "price": price,            // ✅ number, not string
+        }),
+      );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print("✅ Product added: ${response.body}");
-
-      // ⬇️ Trigger rebuild + fetch again
-      setState(() {});
-    } else {
-      print("❌ Failed to post: ${response.body}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("✅ Product added: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Product added successfully")),
+        );
+        setState(() {}); // refresh UI
+      } else {
+        print("❌ Failed to post: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to add product")),
+        );
+      }
+    } catch (e) {
+      print("⚠️ Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Something went wrong")),
+      );
     }
-  } catch (e) {
-    print("⚠️ Error: $e");
-  }
   }
 
+  // ✅ Fetch all products
   Future<List<dynamic>> fetchProducts() async {
     print("Fetching Data...");
     final response = await http.get(
-      Uri.parse("https://fakestoreapi.com/products"),
+      Uri.parse("http://10.0.2.2:8000/products/"),
     );
-    // return jsonDecode(response.body);
+
     if (response.statusCode == 200) {
-      print("Data fetched successfully");
-      return jsonDecode(response.body);
+      final List data = jsonDecode(response.body);
+      print("Fetched: $data");
+      return data;
     } else {
-      throw Exception("Failed to load data");
+      print("Error: ${response.statusCode}");
+      return [];
     }
   }
 
-  //Function to show the dialog for adding a new product
+  // ✅ Dialog for adding product
   void showProductInputDialog() {
-    final TextEditingController titleController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
     final TextEditingController descController = TextEditingController();
     final TextEditingController priceController = TextEditingController();
 
@@ -76,8 +80,8 @@ class _ProductPageState extends State<ProductPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: titleController,
-                decoration: InputDecoration(labelText: "Title"),
+                controller: nameController,
+                decoration: InputDecoration(labelText: "Name"),
               ),
               SizedBox(height: 10),
               TextField(
@@ -104,13 +108,12 @@ class _ProductPageState extends State<ProductPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              String title = titleController.text.trim();
-              String desc = descController.text.trim();
-              double price =
-                  double.tryParse(priceController.text.trim()) ?? 0.0;
+              String name = nameController.text.trim();
+              String description = descController.text.trim();
+              double price = double.tryParse(priceController.text.trim()) ?? 0.0;
 
-              if (title.isNotEmpty && desc.isNotEmpty && price > 0) {
-                await postProduct(title, desc, price);
+              if (name.isNotEmpty && description.isNotEmpty && price > 0) {
+                await postProduct(name, description, price);
                 Navigator.pop(context);
               }
             },
@@ -142,32 +145,25 @@ class _ProductPageState extends State<ProductPage> {
               itemBuilder: (context, index) {
                 final product = products[index];
                 return Card(
-                  elevation: 4, // shadow
+                  elevation: 4,
                   margin: EdgeInsets.all(12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: ListTile(
-                    title: Text(product['title']),
+                    title: Text(product['title']), // ✅ updated
                     subtitle: Text(
                       "Price: ₹${product['price']}",
                       style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    leading: Image.network(
-                      product['image'],
-                      height: 50,
-                      width: 50,
-                      fit: BoxFit.contain,
                     ),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ProductDetailsPage(
-                            image: product["image"]!,
                             name: product["title"]!,
-                            description: product["description"]!,
-                            price: product["price"]!,
+                            description: product["description"] ?? "",
+                            price: product["price"]!.toString(),
                           ),
                         ),
                       );

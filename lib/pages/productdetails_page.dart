@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ProductDetailsPage extends StatefulWidget {
-  final String image;
+  // final String image;
   final String name;
   final String description;
   final dynamic price;
 
   const ProductDetailsPage({
     Key? key,
-    required this.image,
+    // required this.image,
     required this.name,
     required this.description,
     required this.price,
@@ -32,11 +32,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.network(
-                widget.image,
-                height: 200,
-                fit: BoxFit.contain,
-              ),
+              // child: Image.network(
+              //   widget.image,
+              //   height: 200,
+              //   fit: BoxFit.contain,
+              // ),
             ),
             SizedBox(height: 16),
 
