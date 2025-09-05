@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
       {
         "title": "Products",
         "icon": Icons.hourglass_empty,
-        "page": ProductsPage()
+        "page": ProductPage()
       },
       {
         "title": "Weight",

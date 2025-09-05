@@ -123,6 +123,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           ),
         ),
       ),
+      
     );
   }
 }
