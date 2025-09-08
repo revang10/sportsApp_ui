@@ -12,7 +12,7 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   List<Map<String, dynamic>> products = [];
 
-  // ✅ Fixed POST method
+  // ✅ POST method
   Future<void> postProduct(String name, String description, double price) async {
     final url = Uri.parse("http://10.0.2.2:8000/products"); // FastAPI endpoint
 
@@ -28,6 +28,7 @@ class _ProductPageState extends State<ProductPage> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {}); // ✅ Refresh after adding
         print("✅ Product added: ${response.body}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Product added successfully")),
@@ -63,6 +64,57 @@ class _ProductPageState extends State<ProductPage> {
       return [];
     }
   }
+
+
+  // ✅ DELETE PRODUCT
+  Future<void> deleteProduct(int id) async {
+  print("Deleting Product");
+  final response = await http.delete(
+    Uri.parse("http://10.0.2.2:8000/products/$id"),
+  );
+
+  if (response.statusCode == 200) {
+    print("🗑️ Deleted product $id");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Product deleted")),
+    );
+    setState(() {}); 
+  } else {
+    print("❌ Failed to delete: ${response.body}");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Failed to delete product")),
+    );
+  }
+  }
+//  ✅ UPdATE PRODUCT
+  Future<void> updateProduct(int id, String name, String description, double price) async {
+    final response = await http.put(
+    Uri.parse("http://10.0.2.2:8000/products/$id"),
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: jsonEncode({
+      'title': name,
+      'price': price,
+      'description': description,
+    }),
+    );
+
+    if(response.statusCode == 200) {
+      setState(() {});  // ✅ Refresh UI after update
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Product updated")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update product")),
+      );
+    }
+
+  
+  }
+
 
   // ✅ Dialog for adding product
   void showProductInputDialog() {
@@ -114,6 +166,7 @@ class _ProductPageState extends State<ProductPage> {
 
               if (name.isNotEmpty && description.isNotEmpty && price > 0) {
                 await postProduct(name, description, price);
+                setState(() {});
                 Navigator.pop(context);
               }
             },
@@ -122,6 +175,55 @@ class _ProductPageState extends State<ProductPage> {
         ],
       ),
     );
+  }
+
+  void showEditDialog(int id, String oldName, String oldDesc, double oldPrice){
+    final TextEditingController nameController = TextEditingController(text: oldName);
+    final TextEditingController descController = TextEditingController(text: oldDesc);
+    final TextEditingController priceController = TextEditingController(text: oldPrice.toString());
+
+    showDialog(
+      context : context,
+      builder:(context) => AlertDialog(
+        title: Text('Update Product'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children:[
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'New Name'),
+              ),
+              TextField(
+                controller: descController,
+                decoration: InputDecoration(labelText: 'New Description'),  
+              ),
+              TextField(
+                controller: priceController,
+                decoration: InputDecoration(labelText: 'New Price'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed:  () => Navigator.pop(context), child: Text('Cancel')),
+          ElevatedButton(onPressed: () async{
+            await updateProduct(
+              id,
+              nameController.text.trim(),
+              descController.text.trim(),
+              double.tryParse(priceController.text.trim()) ?? 0.0,
+            );
+            Navigator.pop(context);
+          }, child: Text("Update"),
+          ),
+        ],
+
+      ),
+      
+    );
+
   }
 
   @override
@@ -155,6 +257,25 @@ class _ProductPageState extends State<ProductPage> {
                     subtitle: Text(
                       "Price: ₹${product['price']}",
                       style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    
+                    trailing:Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.green),
+                          onPressed: () => showEditDialog(
+                            product['id'],
+                            product['title'],
+                            product['description'] ?? "",
+                            double.tryParse(product['price'].toString()) ?? 0.0,
+                          ),
+                          ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () => deleteProduct(product['id']),
+                        ),
+                      ],
                     ),
                     onTap: () {
                       Navigator.push(
