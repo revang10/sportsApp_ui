@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sports_ui/pages/login_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/notifications_page.dart';
 import 'pages/schedule_page.dart';
@@ -85,6 +86,47 @@ class _HomePageState extends State<HomePage> {
               fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Color(0xFF1076FF),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+             ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Home'),
+              onTap: () {
+                Navigator.pop(context); // just close drawer
+              },
+            ),
+
+            Spacer(), // takes up all available space
+
+            
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
+              onTap: () {
+                // ✅ Replace current screen with LoginPage
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [

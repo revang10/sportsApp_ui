@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sports_ui/pages/login_page.dart';
 import 'home_page.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
         ),
         ),
       ),
-      home: HomePage(), // ✅ start with HomePage
+      home: LoginPage(), // ✅ start with HomePage
     );
   }
 }
