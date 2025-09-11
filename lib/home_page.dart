@@ -227,48 +227,55 @@ class _HomePageState extends State<HomePage> {
                           "${data['FirstName'] ?? ''} ${data['MiddleName'] ?? ''} ${data['LastName'] ?? ''}".trim();
                       String status = (data['IsActive'] == true) ? "Active" : "Inactive";
 
-                      return Container(
-                        margin: EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundImage: data['ProfileImagePath'] != null
-                                  ? NetworkImage(data['ProfileImagePath'])
-                                  : AssetImage('assets/images/profile.jpeg') as ImageProvider,
-                            ),
-                            SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  fullName.isNotEmpty ? fullName : "Unknown User",
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  status,
-                                  style: TextStyle(fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    color: status == "Active" ? Colors.green : Colors.red,
+                      return GestureDetector(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+
+                        },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundImage: data['ProfileImagePath'] != null
+                                    ? NetworkImage(data['ProfileImagePath'])
+                                    : AssetImage('assets/images/profile.jpeg') as ImageProvider,
+                              ),
+                              SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    fullName.isNotEmpty ? fullName : "Unknown User",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  SizedBox(height: 4),
+                                  Text(
+                                    status,
+                                    style: TextStyle(fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: status == "Active" ? Colors.green : Colors.red,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
+                      
                     } else {
                       return SizedBox();
                     }

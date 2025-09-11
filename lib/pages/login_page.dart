@@ -52,12 +52,12 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login/SignUp', style: TextStyle(color: Colors.blueAccent),),
+        title: Text('Login/Sign Up', style: TextStyle(color: Colors.blueAccent),),
         backgroundColor: Colors.white,
         centerTitle: true,
         elevation: 9,
       ),
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           // ✅ Use Column for multiple children

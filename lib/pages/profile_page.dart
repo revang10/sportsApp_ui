@@ -11,30 +11,30 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late TextEditingController _nameController;
+  // late TextEditingController _nameController;
 
-  @override
-  void initState() {
-    super.initState();
-    // _nameController = TextEditingController(text: widget.currentName); // ✅ preload with current name
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _nameController = TextEditingController(text: widget.currentName); // ✅ preload with current name
+  // }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _nameController.dispose();
+  //   super.dispose();
+  // }
 
-  void _saveName() {
-    if (_nameController.text.trim().isNotEmpty) {
-      // widget.onSave(_nameController.text.trim()); // ✅ send new name back to HomePage
-      Navigator.pop(context); // go back to HomePage
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter a name")),
-      );
-    }
-  }
+  // void _saveName() {
+  //   if (_nameController.text.trim().isNotEmpty) {
+  //     // widget.onSave(_nameController.text.trim()); // ✅ send new name back to HomePage
+  //     Navigator.pop(context); // go back to HomePage
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text("Please enter a name")),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -54,29 +54,29 @@ class _ProfilePageState extends State<ProfilePage> {
                   backgroundImage: AssetImage('assets/images/profile.jpeg'),
                 ),
               ),
-            Text("Enter your name:", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 12),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "Your Name",
-              ),
-            ),
+            // Text("Enter your name:", style: TextStyle(fontSize: 18)),
+            // SizedBox(height: 12),
+            // TextField(
+            //   controller: _nameController,
+            //   decoration: InputDecoration(
+            //     border: OutlineInputBorder(),
+            //     hintText: "Your Name",
+            //   ),
+            // ),
             SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: _saveName,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF1076FF),
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                ),
-                child: Text(
-                  "Save",
-                  style: TextStyle(fontSize: 16, color: Colors.white)
-                ),
-              ),
-            ),
+            // Center(
+            //   child: ElevatedButton(
+            //     onPressed: _saveName,
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: Color(0xFF1076FF),
+            //       padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            //     ),
+            //     child: Text(
+            //       "Save",
+            //       style: TextStyle(fontSize: 16, color: Colors.white)
+            //     ),
+            //   ),
+            // ),
             // ElevatedButton(
             //   onPressed: _saveName,
             //   style: ElevatedButton.styleFrom(
