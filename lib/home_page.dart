@@ -20,6 +20,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Map<String,dynamic>? emp ;
   // String userName = "David Jones"; // ✅ stores user name
   List<Map<String, String>> schedule = []; // ✅ stores schedule events
 
@@ -59,6 +60,7 @@ class _HomePageState extends State<HomePage> {
         "title": "Profile",
         "icon": Icons.person,
         "page": ProfilePage(
+          data: emp// Provide an empty map or appropriate default data
           // currentName: userName,
           // onSave: (newName) {
           //   setState(() {
@@ -222,6 +224,7 @@ class _HomePageState extends State<HomePage> {
                       );
                     } else if (snapshot.hasData) {
                       final data = snapshot.data!;
+                      emp=data;
 
                       String fullName =
                           "${data['FirstName'] ?? ''} ${data['MiddleName'] ?? ''} ${data['LastName'] ?? ''}".trim();
@@ -229,7 +232,7 @@ class _HomePageState extends State<HomePage> {
 
                       return GestureDetector(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage(data: snapshot.data!)));
 
                         },
                         child: Container(
