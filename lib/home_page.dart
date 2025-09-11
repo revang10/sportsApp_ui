@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:sports_ui/pages/login_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/notifications_page.dart';
@@ -9,6 +10,9 @@ import 'pages/products_page.dart';
 import 'pages/weight_page.dart';
 import 'pages/sleep_page.dart';
 import 'pages/settings_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,8 +20,35 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String userName = "David Jones"; // ✅ stores user name
+  // String userName = "David Jones"; // ✅ stores user name
   List<Map<String, String>> schedule = []; // ✅ stores schedule events
+
+  Future<String?> get_Token() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  Future<Map<String,dynamic>> fetchEmployeInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    print("✅ Token in HomePage: $token");
+
+    final response = await http.get(
+      Uri.parse("https://api.repro360.in/api/EmployeeMaster_API/74"),
+      headers: {
+        'Authorization' : 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode==200){
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load data');
+
+    }
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +59,12 @@ class _HomePageState extends State<HomePage> {
         "title": "Profile",
         "icon": Icons.person,
         "page": ProfilePage(
-          currentName: userName,
-          onSave: (newName) {
-            setState(() {
-              userName = newName;
-            });
-          },
+          // currentName: userName,
+          // onSave: (newName) {
+          //   setState(() {
+          //     userName = newName;
+          //   });
+          // },
         ),
       },
       {
@@ -79,13 +110,16 @@ class _HomePageState extends State<HomePage> {
     ];
 
     return Scaffold(
+      //backgroundColor:   Color.fromARGB(255, 43, 123, 226),
+      backgroundColor:   Colors.white60,
+
       appBar: AppBar(
         title: Text(
           "Home Page",
           style: TextStyle(
               fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Color(0xFF1076FF),
+        backgroundColor: Color.fromARGB(255, 16, 120, 255),
       ),
       drawer: Drawer(
         child: ListView(
@@ -113,11 +147,14 @@ class _HomePageState extends State<HomePage> {
 
             Spacer(), // takes up all available space
 
-            
+
             ListTile(
               leading: Icon(Icons.logout),
               title: Text('Logout'),
-              onTap: () {
+              onTap: () async{
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('token');
+                print("✅ Token removed ");
                 // ✅ Replace current screen with LoginPage
                 Navigator.pushReplacement(
                   context,
@@ -137,45 +174,111 @@ class _HomePageState extends State<HomePage> {
             child: Image.asset('assets/images/himg1.jpg', fit: BoxFit.cover),
           ),
 
-          // 🔹 Profile Info Container
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))
-              ],
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                    radius: 40,
-                    backgroundImage: AssetImage('assets/images/profile.jpeg')),
-                SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(userName,
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87)),
-                    SizedBox(height: 4),
-                    Text("Active User",
-                        style: TextStyle(fontSize: 14, color: Colors.black54)),
-                  ],
+          // // 🔹 Profile Info Container
+          // Container(
+          //   margin: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+          //   padding: EdgeInsets.all(12),
+          //   decoration: BoxDecoration(
+          //     borderRadius: BorderRadius.circular(12),
+          //     color: Colors.white,
+          //     boxShadow: [
+          //       BoxShadow(
+          //           color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))
+          //     ],
+          //   ),
+          //   child: Row(
+          //     children: [
+          //       CircleAvatar(
+          //           radius: 40,
+          //           backgroundImage: AssetImage('assets/images/profile.jpeg')),
+          //       SizedBox(width: 16),
+          //       Column(
+          //         crossAxisAlignment: CrossAxisAlignment.start,
+          //         children: [
+          //           Text(userName,
+          //               style: TextStyle(
+          //                   fontSize: 20,
+          //                   fontWeight: FontWeight.bold,
+          //                   color: Colors.black87)),
+          //           SizedBox(height: 4),
+          //           Text("Active User",
+          //               style: TextStyle(fontSize: 14, color: Colors.black54)),
+          //         ],
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // 🔹 Profile Info Container with API
+              FutureBuilder<Map<String, dynamic>>(
+                  future: fetchEmployeInfo(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Container(
+                        margin: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                        padding: EdgeInsets.all(12),
+                        child: Text("Error : ${snapshot.error}", style: TextStyle(color: Colors.red)),
+                      );
+                    } else if (snapshot.hasData) {
+                      final data = snapshot.data!;
+
+                      String fullName =
+                          "${data['FirstName'] ?? ''} ${data['MiddleName'] ?? ''} ${data['LastName'] ?? ''}".trim();
+                      String status = (data['IsActive'] == true) ? "Active" : "Inactive";
+
+                      return Container(
+                        margin: EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 0))
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage: data['ProfileImagePath'] != null
+                                  ? NetworkImage(data['ProfileImagePath'])
+                                  : AssetImage('assets/images/profile.jpeg') as ImageProvider,
+                            ),
+                            SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  fullName.isNotEmpty ? fullName : "Unknown User",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  status,
+                                  style: TextStyle(fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: status == "Active" ? Colors.green : Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return SizedBox();
+                    }
+                  },
                 ),
-              ],
-            ),
-          ),
 
           // 🔹 Grid Menu
           Expanded(
             child: Container(
-              margin: EdgeInsets.all(8),
+              margin: EdgeInsets.only(left: 8, right: 8, bottom: 8), 
               child: GridView.count(
                 crossAxisCount: 3,
                 crossAxisSpacing: 8,

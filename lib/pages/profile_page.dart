@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
-  final String currentName;
-  final Function(String) onSave;
+  // final String currentName;
+  // final Function(String) onSave;
 
-  const ProfilePage({Key? key, required this.currentName, required this.onSave}) : super(key: key);
+  // const ProfilePage({Key? key, required this.currentName, required this.onSave}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -16,7 +16,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.currentName); // ✅ preload with current name
+    // _nameController = TextEditingController(text: widget.currentName); // ✅ preload with current name
   }
 
   @override
@@ -27,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _saveName() {
     if (_nameController.text.trim().isNotEmpty) {
-      widget.onSave(_nameController.text.trim()); // ✅ send new name back to HomePage
+      // widget.onSave(_nameController.text.trim()); // ✅ send new name back to HomePage
       Navigator.pop(context); // go back to HomePage
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

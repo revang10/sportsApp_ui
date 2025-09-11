@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sports_ui/home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -18,11 +19,19 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
 
 
-  void login_button(){
+  void login_button() async{
     String username = usernameController.text;
     String password = passwordController.text;
 
     if (username == fakedb['username'] && password == fakedb['password']){
+      
+      
+      //Save Token
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImp0aSI6IjM0Y2IzOGUyLWRlZGItNDQ2OC1hMWNjLTY4NWM1YWIzZjA5ZiIsImV4cCI6MTc1NzU5MzUxNywiaXNzIjoieW91cl9pc3N1ZXIiLCJhdWQiOiJ5b3VyX2F1ZGllbmNlIn0.VFw3OvSyaQKd5yu7BdEpIkLTl_Dk13y294AG5onB_14');
+      print("✅ Token saved ");
+
+      // Navigate to HomePage
       Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => HomePage()),
