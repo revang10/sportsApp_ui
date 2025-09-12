@@ -4,7 +4,7 @@ import 'package:sports_ui/pages/login_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/notifications_page.dart';
 import 'pages/schedule_page.dart';
-import 'pages/exercises_page.dart';
+import 'pages/leave_request.dart';
 import 'pages/trainingplan_page.dart';
 import 'pages/products_page.dart';
 import 'pages/weight_page.dart';
@@ -44,6 +44,7 @@ class _HomePageState extends State<HomePage> {
     if (response.statusCode==200){
       return json.decode(response.body);
     } else {
+      print("Failed to load data: ${response.statusCode}");
       throw Exception('Failed to load data');
 
     }
@@ -88,9 +89,9 @@ class _HomePageState extends State<HomePage> {
         ),
       },
       {
-        "title": "Exercises",
-        "icon": Icons.sports_gymnastics,
-        "page": ExercisesPage()
+        "title": "Leave Request",
+        "icon": Icons.schedule,
+        "page": LeavePage()
       },
       {
         "title": "Training Plan",

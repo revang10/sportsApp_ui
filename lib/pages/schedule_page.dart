@@ -47,8 +47,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 "No events yet. Tap + to add one!",
                 style: TextStyle(fontSize: 18),
               ),
-            )
-          : ListView.builder(
+            ): 
+            ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: widget.schedule.length,
               itemBuilder: (context, index) {
