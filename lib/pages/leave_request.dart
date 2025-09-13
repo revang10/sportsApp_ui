@@ -14,11 +14,14 @@ class _LeavePageState extends State<LeavePage> {
   TextEditingController startDateController = TextEditingController();
   TextEditingController endDateController = TextEditingController();
   TextEditingController reasonController = TextEditingController();
-  TextEditingController leaveIDController = TextEditingController();
+  TextEditingController employeeIDController = TextEditingController();
 
   DateTime? startDate;
   DateTime? endDate;
   String? selectedLeave;
+
+  List<dynamic> leaveRequests = [];
+  bool isLoading = true;
 
   final Map<String, int> leavetypeMap = {
     "Sick Leave": 0,
@@ -26,14 +29,63 @@ class _LeavePageState extends State<LeavePage> {
     "Paid Leave": 2,
   };
 
+  final Map<int, String> leaveTypeName = {
+    0: "Sick Leave",
+    1: "Casual Leave",
+    2: "Paid Leave",
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLeaveRequests();
+  }
+
+  /// Fetch all leave requests
+  Future<void> fetchLeaveRequests() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    setState(() => isLoading = true);
+
+    try {
+      final response = await http.get(
+        Uri.parse("https://api.repro360.in/api/LeaveRequest"),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      print("📥 GET Response Status: ${response.statusCode}");
+      print("📥 GET Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        setState(() {
+          leaveRequests = jsonDecode(response.body);
+          isLoading = false;
+        });
+      } else {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Failed to load leave requests")),
+        );
+      }
+    } catch (e) {
+      print("🔥 Exception in fetchLeaveRequests: $e");
+      setState(() => isLoading = false);
+    }
+  }
+
+  /// Submit leave request
   Future<void> submitLeaveRequest(BuildContext dialogContext) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     print("✅ Token in SharedPreferences: $token");
 
+    final empId = int.tryParse(employeeIDController.text) ?? 0;
+
     final body = {
-      "LeaveRequestId": int.tryParse(leaveIDController.text) ?? 0,                    // int
-      "EmployeeId": 0,                       // your employee id
+      "EmployeeId": empId,
       "LeaveTypeId": leavetypeMap[selectedLeave] ?? 0,
       "StartDate": startDate?.toUtc().toIso8601String(),
       "EndDate": endDate?.toUtc().toIso8601String(),
@@ -41,16 +93,14 @@ class _LeavePageState extends State<LeavePage> {
       "EndDateType": 0,
       "Reason": reasonController.text,
       "CreatedDate": DateTime.now().toUtc().toIso8601String(),
-      "CreatedBy": 123,                        // same as EmployeeId
+      "CreatedBy": empId,
       "ModifiedDate": DateTime.now().toUtc().toIso8601String(),
-      "ModifiedBy": 123,
+      "ModifiedBy": empId,
       "IsDeleted": false,
-      "DeletedDate": DateTime.now().toUtc().toIso8601String(),
-      "DeletedBy": ""
+      "DeletedDate": null,
+      "DeletedBy": null
     };
 
-
-    print("🟡 Preparing to send leave request...");
     print("📤 Sending Payload: $body");
 
     try {
@@ -63,17 +113,16 @@ class _LeavePageState extends State<LeavePage> {
         body: jsonEncode(body),
       );
 
-      print("📥 Response Status: ${response.statusCode}");
-      print("📥 Response Body: ${response.body}");
+      print("📥 POST Response Status: ${response.statusCode}");
+      print("📥 POST Response Body: ${response.body}");
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print("✅ Leave request submitted successfully!");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("✅ Leave request submitted successfully")),
         );
-        Navigator.pop(dialogContext); // ✅ Close dialog after success
+        Navigator.pop(dialogContext);
+        fetchLeaveRequests(); // 🔄 Refresh list after submit
       } else {
-        print("❌ Failed to submit leave request!");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("❌ Failed: ${response.body}")),
         );
@@ -83,8 +132,8 @@ class _LeavePageState extends State<LeavePage> {
     }
   }
 
+  /// Open Dialog to add new leave request
   void openDialog() {
-    print("🟢 Opening Leave Request Dialog...");
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -94,20 +143,18 @@ class _LeavePageState extends State<LeavePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Employee ID
                 TextField(
-                  controller: leaveIDController,
+                  controller: employeeIDController,
                   decoration: InputDecoration(
-                    labelText: 'Leave Request ID',
-                    hintText: 'Enter Leave Request ID',
-                    prefixIcon: Icon(Icons.numbers),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                    labelText: 'Employee ID',
+                    hintText: 'Enter Employee ID',
+                    prefixIcon: Icon(Icons.badge),
+                    border: OutlineInputBorder(),
                   ),
-                  onChanged: (value) {
-                    print("✏️ Reason typed: $value");
-                  },
                 ),
+                SizedBox(height: 12),
+
                 // Start Date
                 TextField(
                   controller: startDateController,
@@ -116,15 +163,12 @@ class _LeavePageState extends State<LeavePage> {
                     labelText: 'Start Date',
                     hintText: 'Select Date',
                     prefixIcon: Icon(Icons.date_range),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                    border: OutlineInputBorder(),
                   ),
                   onTap: () async {
-                    print("🟡 User tapped on Start Date...");
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
-                      firstDate: DateTime(2002),
+                      firstDate: DateTime(2000),
                       lastDate: DateTime(2050),
                       initialDate: DateTime.now(),
                     );
@@ -134,9 +178,6 @@ class _LeavePageState extends State<LeavePage> {
                         startDateController.text =
                             "${pickedDate.day}-${pickedDate.month}-${pickedDate.year}";
                       });
-                      print("✅ Start Date selected: $startDate");
-                    } else {
-                      print("⚠️ Start Date not selected.");
                     }
                   },
                 ),
@@ -150,12 +191,9 @@ class _LeavePageState extends State<LeavePage> {
                     labelText: 'End Date',
                     hintText: 'Select Date',
                     prefixIcon: Icon(Icons.date_range),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                    border: OutlineInputBorder(),
                   ),
                   onTap: () async {
-                    print("🟡 User tapped on End Date...");
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
                       firstDate: DateTime(2000),
@@ -166,12 +204,8 @@ class _LeavePageState extends State<LeavePage> {
                       if (startDate != null &&
                           pickedDate.isBefore(startDate!)) {
                         endDateController.clear();
-                        print(
-                            "❌ End date $pickedDate is before Start date $startDate");
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text("⚠️ End date must be after Start date")),
+                          SnackBar(content: Text("⚠️ End date must be after Start date")),
                         );
                       } else {
                         setState(() {
@@ -179,10 +213,7 @@ class _LeavePageState extends State<LeavePage> {
                           endDateController.text =
                               "${pickedDate.day}-${pickedDate.month}-${pickedDate.year}";
                         });
-                        print("✅ End Date selected: $endDate");
                       }
-                    } else {
-                      print("⚠️ End Date not selected.");
                     }
                   },
                 ),
@@ -196,13 +227,8 @@ class _LeavePageState extends State<LeavePage> {
                     labelText: 'Reason',
                     hintText: 'Enter Reason',
                     prefixIcon: Icon(Icons.notes),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                    border: OutlineInputBorder(),
                   ),
-                  onChanged: (value) {
-                    print("✏️ Reason typed: $value");
-                  },
                 ),
                 SizedBox(height: 12),
 
@@ -214,21 +240,17 @@ class _LeavePageState extends State<LeavePage> {
                   ),
                   isExpanded: true,
                   value: selectedLeave,
-                  items:
-                      ["Sick Leave", "Casual Leave", "Paid Leave"].map((type) {
+                  items: ["Sick Leave", "Casual Leave", "Paid Leave"]
+                      .map((type) {
                     return DropdownMenuItem(
                       value: type,
-                      child: SizedBox(
-                        width: 200,
-                        child: Text(type, overflow: TextOverflow.ellipsis),
-                      ),
+                      child: Text(type),
                     );
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
                       selectedLeave = value!;
                     });
-                    print("📌 Leave Type selected: $selectedLeave");
                   },
                 ),
               ],
@@ -236,20 +258,16 @@ class _LeavePageState extends State<LeavePage> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                print("❌ Cancel button clicked. Closing dialog.");
-                Navigator.pop(dialogContext);
-              },
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text("Cancel"),
             ),
             ElevatedButton(
               onPressed: () {
-                print("🟢 Submit button clicked!");
                 if (startDate == null ||
                     endDate == null ||
                     reasonController.text.isEmpty ||
-                    selectedLeave == null) {
-                  print("⚠️ Validation failed! Fields missing.");
+                    selectedLeave == null ||
+                    employeeIDController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("⚠️ Please fill all fields")),
                   );
@@ -267,15 +285,31 @@ class _LeavePageState extends State<LeavePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("🔄 Building LeavePage UI...");
     return Scaffold(
       appBar: AppBar(
         title: Text("Leave Request Page"),
         backgroundColor: const Color(0xFF1076FF),
       ),
-      body: Center(
-        child: Text("No Leave Requests"),
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : leaveRequests.isEmpty
+              ? Center(child: Text("No Leave Requests"))
+              : ListView.builder(
+                  itemCount: leaveRequests.length,
+                  itemBuilder: (context, index) {
+                    final req = leaveRequests[index];
+                    return Card(
+                      margin: EdgeInsets.all(10),
+                      child: ListTile(
+                        title: Text("Reason: ${req['Reason'] ?? 'N/A'} ${req['EmployeeId']}"),
+                        subtitle: Text(
+                          "Type: ${leaveTypeName[req['LeaveTypeId']] ?? 'Unknown'}\n"
+                          "From: ${req['StartDate']} → To: ${req['EndDate']}",
+                        ),
+                      ),
+                    );
+                  },
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: openDialog,
         child: Icon(Icons.add),
