@@ -41,8 +41,8 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
 
       // ✅ Use widget.schedule (parent data)
-      body: widget.schedule.isEmpty
-          ? const Center(
+      body: widget.schedule.isEmpty? 
+            const Center(
               child: Text(
                 "No events yet. Tap + to add one!",
                 style: TextStyle(fontSize: 18),
