@@ -177,34 +177,143 @@ class _LeavePageState extends State<LeavePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text("Leave Request Details"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("📝 Reason: ${formatText(req['Reason'])}"),
-              const SizedBox(height: 8),
-              Text("📂 Type: ${formatText(leaveTypeName[req['LeaveTypeId']])}"),
-              const SizedBox(height: 8),
-              Text("📅 From: ${formatDate(req['StartDate'])}"),
-              Text("📅 To: ${formatDate(req['EndDate'])}"),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Close"),
+          titlePadding: EdgeInsets.zero, // Remove default padding
+          title: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF1076FF), // Blue background
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-          ],
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: const [
+                Icon(Icons.info, color: Colors.white),
+                SizedBox(width: 12),
+                Text(
+                  "Leave Request Details",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: SizedBox(
+            width:
+                MediaQuery.of(context).size.width * 0.98, // 90% of screen width
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 4.0,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Reason
+                    Row(
+                      children: [
+                        const Icon(Icons.notes, color: Colors.deepPurple),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            formatText(req['Reason']),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Type
+                    Row(
+                      children: [
+                        const Icon(Icons.category, color: Colors.teal),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            formatText(leaveTypeName[req['LeaveTypeId']]),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // From Date
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "From: ${formatDate(req['StartDate'])}",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // To Date
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          color: Colors.redAccent,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "To: ${formatDate(req['EndDate'])}",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // actions: [
+          //   TextButton(
+          //     onPressed: () => Navigator.pop(context),
+          //     child: const Text(
+          //       "Close",
+          //       style: TextStyle(
+          //         color: Color(0xFF1076FF),
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //   ),
+          // ],
         );
       },
     );
   }
 
-
-//  Leave Request Dialog
+  //  Leave Request Dialog
   void openDialog() {
     print("📂 Opening leave request dialog...");
     showDialog(
