@@ -146,7 +146,18 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 Navigator.pop(context); // just close drawer
               },
+              
             ),
+            // ListTile(
+            //   leading: Icon(Icons.logout),
+            //   title: Text('Log Out'),
+            //   onTap: (){
+            //     Navigator.pushReplacement(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => LoginPage()),
+            //     );
+            //   },
+            // ),
 
             Spacer(), // takes up all available space
 
